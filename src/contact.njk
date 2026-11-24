@@ -134,8 +134,10 @@ permalink: /contact.html
   }
 }
 </script>
+{% include "tracking-head.njk" %}
 </head>
 <body>
+{% include "tracking-body.njk" %}
 
 <div class="utility">
   <div class="wrap">
@@ -393,5 +395,7 @@ permalink: /contact.html
 
 <script src="app.js" defer></script>
 
+{% raw %}<!-- Google Ads conversion: Contact page -->
+<script>gtag('event', 'conversion', {'send_to': 'AW-16977537693/l0WfCLmOqL8aEJ3Vwp8_'});</script>{% endraw %}
 </body>
 </html>
