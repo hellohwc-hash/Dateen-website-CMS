@@ -1,7 +1,9 @@
 {
   "name": "dateen",
+  "main": "worker/index.js",
   "compatibility_date": "2025-01-01",
   "assets": {
-    "directory": "./_site"
+    "directory": "./_site",
+    "binding": "ASSETS"
   }
 }

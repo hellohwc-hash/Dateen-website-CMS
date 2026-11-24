@@ -10,7 +10,7 @@ backend:
   name: github
   repo: hellohwc-hash/Dateen-website-CMS   # your GitHub username/repo
   branch: main
-  base_url: https://YOUR-AUTH-WORKER.workers.dev   # <-- STILL TO DO (Step 4, the login Worker)
+  base_url: https://dateen.my   # login handled by this same Worker (/auth + /callback)
 
 # Where uploaded images are stored in the repo, and the URL they are served from
 media_folder: "src/photos"
