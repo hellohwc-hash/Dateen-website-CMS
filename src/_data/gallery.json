@@ -1,0 +1,12 @@
+{
+  "catering": [
+    { "image": "/photos/catering-friedrice.jpg",     "caption": "Signature Rendang", "tag": "Buffet" },
+    { "image": "/photos/catering-canapes.jpg",        "caption": "Canapé Spread",     "tag": "Tea Break" },
+    { "image": "/photos/catering-fruit.jpg",          "caption": "Fresh Fruit Platter", "tag": "Catering" },
+    { "image": "/photos/catering-skyline.jpg",        "caption": "Buffet with a KL View", "tag": "Corporate Event" },
+    { "image": "/photos/catering-rendang-buffet.jpg", "caption": "Chafing-Dish Service", "tag": "Buffet" },
+    { "image": "/photos/catering-tower.jpg",          "caption": "Festive Catering",  "tag": "Event" },
+    { "image": "/photos/catering-currypuff.jpg",      "caption": "Local Favourites",  "tag": "Canapés" },
+    { "image": "/photos/catering-lights.jpg",         "caption": "Evening Functions", "tag": "Catering" }
+  ]
+}

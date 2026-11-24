@@ -1,0 +1,106 @@
+# ============================================================
+#  Dateen CMS configuration (Sveltia / Decap compatible)
+#  >>> EDIT THE TWO PLACEHOLDERS BELOW before going live <<<
+#    1. backend.repo   -> your GitHub  username/repository
+#    2. backend.base_url -> your deployed sveltia-cms-auth Worker URL
+#  (See README-DEPLOY.md, Step 4)
+# ============================================================
+
+backend:
+  name: github
+  repo: hellohwc-hash/Dateen-website-CMS   # your GitHub username/repo
+  branch: main
+  base_url: https://YOUR-AUTH-WORKER.workers.dev   # <-- STILL TO DO (Step 4, the login Worker)
+
+# Where uploaded images are stored in the repo, and the URL they are served from
+media_folder: "src/photos"
+public_folder: "/photos"
+
+# Nicer editor: show the live site when saving
+site_url: https://dateen.my
+display_url: https://dateen.my
+logo_url: /brand/logo-primary.png
+
+collections:
+  # ---------------- Site settings, banners, contact ----------------
+  - name: settings
+    label: "Site Settings"
+    description: "Phone, contact details, page banners and homepage stats"
+    files:
+      - name: contact_banners
+        label: "Contact & Banners"
+        file: "src/_data/site.json"
+        fields:
+          - { name: phone, label: "Phone (display, e.g. 012-201 5578)", widget: string }
+          - { name: phoneIntl, label: "Phone (international, e.g. +60 12-201 5578)", widget: string }
+          - { name: whatsapp, label: "WhatsApp number (digits only, e.g. 60122015578)", widget: string }
+          - { name: email, label: "Email", widget: string }
+          - { name: address, label: "Address", widget: string }
+          - { name: hoursWeekday, label: "Opening hours (weekday)", widget: string }
+          - { name: hoursSat, label: "Opening hours (Saturday)", widget: string }
+          - { name: instagram, label: "Instagram handle (without @)", widget: string }
+          - { name: freeDeliveryMin, label: "Free delivery minimum (e.g. RM50)", widget: string }
+          - name: stats
+            label: "Homepage stats"
+            widget: object
+            fields:
+              - { name: years, label: "Years in service", widget: string }
+              - { name: accounts, label: "Corporate accounts", widget: string }
+              - { name: lines, label: "Service lines", widget: string }
+              - { name: pax, label: "Pax per event", widget: string }
+          - name: banners
+            label: "Page banner images"
+            widget: object
+            fields:
+              - { name: catering, label: "Catering Service banner", widget: image }
+              - { name: bento, label: "Bento Menu banner", widget: image }
+              - { name: bungkus, label: "Bungkus Supply banner", widget: image }
+              - { name: vegetarian, label: "Vegetarian Catering banner", widget: image }
+              - { name: coldbrew, label: "Cold Brew visual (Bento page)", widget: image }
+
+      # ---------------- Prices ----------------
+      - name: prices
+        label: "Prices"
+        file: "src/_data/prices.json"
+        fields:
+          - { name: bentoFrom, label: "Bento from (RM)", widget: string }
+          - { name: valueMeal, label: "Value meal each (RM)", widget: string }
+          - { name: vegBento, label: "Vegetarian bento each (RM)", widget: string }
+          - { name: coldbrewAmericano, label: "Cold Brew Americano (RM)", widget: string }
+          - { name: coldbrewLatte, label: "Cold Brew Latte (RM)", widget: string }
+          - { name: bungkusReseller, label: "Bungkus reseller each (RM)", widget: string }
+          - { name: cateringFullDayA, label: "Catering Full Day A (RM/pax)", widget: string }
+          - { name: cateringFullDayB, label: "Catering Full Day B (RM/pax)", widget: string }
+          - { name: cateringFullDayC, label: "Catering Full Day C, Western (RM/pax)", widget: string }
+          - { name: cateringLunchLocal, label: "Lunch & Dinner, Local from (RM/pax)", widget: string }
+          - { name: cateringLunchWestern, label: "Lunch & Dinner, Western from (RM/pax)", widget: string }
+          - { name: cateringTeaLocal, label: "Tea Break, Local from (RM/pax)", widget: string }
+          - { name: cateringTeaWestern, label: "Tea Break, Western from (RM/pax)", widget: string }
+
+      # ---------------- Client list ----------------
+      - name: clients
+        label: "Client List"
+        file: "src/_data/clients.json"
+        fields:
+          - name: trusted
+            label: "Trusted-by band (homepage top strip)"
+            widget: list
+            field: { name: name, label: "Company", widget: string }
+          - name: wall
+            label: "Client wall (full grid)"
+            widget: list
+            field: { name: name, label: "Company", widget: string }
+
+      # ---------------- Catering gallery ----------------
+      - name: gallery
+        label: "Catering Gallery"
+        file: "src/_data/gallery.json"
+        fields:
+          - name: catering
+            label: "Gallery photos"
+            widget: list
+            summary: "{{fields.caption}}"
+            fields:
+              - { name: image, label: "Photo", widget: image }
+              - { name: caption, label: "Caption", widget: string }
+              - { name: tag, label: "Tag (shown in italics)", widget: string }

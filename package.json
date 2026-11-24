@@ -1,0 +1,13 @@
+{
+  "name": "dateen-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dateen corporate catering website (Eleventy + Sveltia CMS)",
+  "scripts": {
+    "build": "eleventy",
+    "dev": "eleventy --serve"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.2"
+  }
+}
