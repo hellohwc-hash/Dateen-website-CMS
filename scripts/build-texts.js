@@ -36,6 +36,16 @@ const items = [];
 const seen = new Set();
 for (const [page, file, title, url] of PAGES) {
   const src = fs.readFileSync(path.join(ROOT, "src", file + ".njk"), "utf8");
+  // SEO: title, meta description, share image (edited per page in the admin)
+  const seoSec = "SEO — Google search & link sharing";
+  const tplVars = (s) => s.replace(/\{\{\s*site\.phoneIntl\s*\}\}/g, "[phone]").replace(/\{\{\s*site\.email\s*\}\}/g, "[email]");
+  const tm = src.match(/<title>([^<]*)<\/title>/);
+  const dm = src.match(/<meta name="description" content="([^"]*)"/);
+  const im = src.match(/<meta property="og:image" content="([^"]*)"/);
+  items.push({ k: "seo." + page + ".title", page, section: seoSec, label: "Page title (Google + browser tab)", def: tplVars(decode(tm ? tm[1] : "")), kind: "seo-title" });
+  items.push({ k: "seo." + page + ".desc", page, section: seoSec, label: "Description (Google snippet)", def: tplVars(decode(dm ? dm[1] : "")), kind: "seo-desc" });
+  items.push({ k: "seo." + page + ".image", page, section: seoSec, label: "Share image (WhatsApp / Facebook / LinkedIn preview)", def: im ? im[1] : "", kind: "seo-image" });
+
   const re = /<!--E:([\w.-]+)\|([^|]*)\|([^>]*?)-->([\s\S]*?)<!--\/E-->/g;
   let m;
   while ((m = re.exec(src))) {

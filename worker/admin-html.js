@@ -131,7 +131,8 @@ function galleryEditor(){
 }
 
 // ----- editable page text -----
-function grow(t){t.style.height="auto";t.style.height=(t.scrollHeight+2)+"px"}
+function grow(t){if(!t.isConnected)return;if(!t.offsetWidth){setTimeout(function(){grow(t)},150);return}t.style.height="auto";t.style.height=(t.scrollHeight+2)+"px"}
+window.addEventListener("resize",function(){document.querySelectorAll("textarea").forEach(grow)});
 function textEditor(it,showPage){
   var val=Object.prototype.hasOwnProperty.call(O,it.k)?O[it.k]:it.def;
   var ta=h("textarea",{rows:"1"});ta.value=val;
@@ -151,12 +152,38 @@ function pageName(id){for(var i=0;i<PAGES.length;i++)if(PAGES[i][0]===id)return 
 function pageUrl(id){for(var i=0;i<PAGES.length;i++)if(PAGES[i][0]===id)return PAGES[i][2];return "/"}
 function textSections(page){
   var out=[],secs={},order=[];
-  TEXTS.forEach(function(it){if(it.page!==page)return;if(!secs[it.section]){secs[it.section]=[];order.push(it.section)}secs[it.section].push(it)});
+  TEXTS.forEach(function(it){if(it.page!==page||it.kind)return;if(!secs[it.section]){secs[it.section]=[];order.push(it.section)}secs[it.section].push(it)});
   order.forEach(function(s){
     var g=h("div",{class:"tgrid"},secs[s].map(function(it){var e=textEditor(it);if(it.def.length>38||it.def.indexOf("*")>=0)e.classList.add("wide");return e}));
     out.push(card(s,[g],secs[s].length+" texts"));
   });
   return out;
+}
+
+// ----- SEO card -----
+function seoItem(page,kind){for(var i=0;i<TEXTS.length;i++)if(TEXTS[i].page===page&&TEXTS[i].kind===kind)return TEXTS[i];return null}
+function cur(it){return Object.prototype.hasOwnProperty.call(O,it.k)?O[it.k]:it.def}
+function seoCard(page){
+  var ti=seoItem(page,"seo-title"),de=seoItem(page,"seo-desc"),im=seoItem(page,"seo-image");
+  if(!ti)return null;
+  var pv=h("div",{style:"border:1px solid #eee;border-radius:9px;padding:12px 14px;margin:4px 0 14px;font-family:arial,sans-serif;background:#fff"});
+  var pu=h("div",{style:"font-size:12px;color:#4d5156"},["dateen.my"+(pageUrl(page)==="/"?"":pageUrl(page))]);
+  var pt=h("div",{style:"font-size:18px;color:#1a0dab;margin:3px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"});
+  var pd=h("div",{style:"font-size:13px;color:#4d5156;line-height:1.5"});
+  pv.appendChild(h("div",{class:"note",style:"margin:0 0 6px"},["Preview — how it may look on Google"]));pv.appendChild(pu);pv.appendChild(pt);pv.appendChild(pd);
+  function fill(s){return String(s).split("[phone]").join(C.phoneIntl||"").split("[email]").join(C.email||"")}
+  function counter(it,max){var n=h("span",{class:"note",style:"margin:0 0 0 auto"});function u(){var l=fill(cur(it)).length;n.textContent=l+" / ~"+max+" characters";n.style.color=l>max?"#c40018":"#999"}u();return {el:n,u:u}}
+  function upd(){pt.textContent=fill(cur(ti));var d=fill(cur(de));pd.textContent=d.length>160?d.slice(0,157)+"…":d;c1.u();c2.u()}
+  var c1=counter(ti,60),c2=counter(de,155);
+  var e1=textEditor(ti),e2=textEditor(de);
+  e1.querySelector(".top").insertBefore(c1.el,e1.querySelector(".rs"));
+  e2.querySelector(".top").insertBefore(c2.el,e2.querySelector(".rs"));
+  e1.addEventListener("input",upd);e2.addEventListener("input",upd);e1.addEventListener("click",function(){setTimeout(upd,0)});e2.addEventListener("click",function(){setTimeout(upd,0)});
+  upd();
+  var img=imgField(im.label,"1200×630 px (landscape, under ~1MB)",function(){return cur(im)},function(v){if(v===im.def)delete O[im.k];else O[im.k]=v;navCounts()});
+  var rs=h("button",{class:"ghost",style:"margin-left:6px"},["Reset"]);rs.onclick=function(){delete O[im.k];img.querySelector("img").src=im.def;dirty();navCounts()};
+  img.appendChild(rs);
+  return card(ti.section,[pv,e1,e2,img,h("div",{class:"note"},["Tip: you can write [phone] or [email] and it fills in the number/email from Settings. Google may take days–weeks to show changes."])]);
 }
 
 // ----- structured (non-text) fields per page -----
@@ -203,7 +230,7 @@ function render(){
   if(q){
     app.appendChild(h("div",{class:"ptitle"},[h("h1",null,["Search: “"+q+"”"])]));
     app.appendChild(helpBox());
-    var hits=TEXTS.filter(function(it){var v=Object.prototype.hasOwnProperty.call(O,it.k)?O[it.k]:it.def;return (v+" "+it.def).toLowerCase().indexOf(q)>=0}).slice(0,80);
+    var hits=TEXTS.filter(function(it){if(it.kind==="seo-image")return false;var v=Object.prototype.hasOwnProperty.call(O,it.k)?O[it.k]:it.def;return (v+" "+it.def).toLowerCase().indexOf(q)>=0}).slice(0,80);
     if(!hits.length)app.appendChild(h("div",{class:"empty"},["No text found."]));
     else app.appendChild(card(hits.length+" match"+(hits.length>1?"es":""),hits.map(function(it){return textEditor(it,true)})));
     return;
@@ -217,6 +244,7 @@ function render(){
   app.appendChild(t);
   app.appendChild(h("p",{class:"psub"},[CUR==="all"?"Text in the thin top bar and the footer — shown on every page.":"Everything you can change on this page, top to bottom."]));
   var st=STRUCT[CUR]?STRUCT[CUR]():[];
+  var seo=seoCard(CUR);if(seo)st.unshift(seo);
   if(CUR!=="home")st.forEach(function(c){app.appendChild(c)});
   app.appendChild(helpBox());
   textSections(CUR).forEach(function(c){app.appendChild(c)});

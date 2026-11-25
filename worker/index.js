@@ -113,7 +113,36 @@ function applyTexts(html, texts) {
   return html.replace(MARK, (m, k, orig) => (Object.prototype.hasOwnProperty.call(texts, k) ? textToHtml(texts[k], orig) : orig));
 }
 
-function renderHTML(html, c, texts) {
+// which page a request path belongs to (home, catering, …) — for per-page SEO
+function pageIdFor(pathname) {
+  const norm = (p) => p.replace(/\/+$/, "").replace(/\.html$/, "").replace(/^\/index$/, "") || "/";
+  const p = norm(pathname);
+  const hit = TEXT_PAGES.find((x) => x[0] !== "all" && norm(x[2]) === p);
+  return hit ? hit[0] : null;
+}
+function applySeo(html, texts, page, c, origin) {
+  if (!page) return html;
+  const g = (f) => texts["seo." + page + "." + f];
+  const fill = (s) => esc(String(s).replace(/\[phone\]/g, c.phoneIntl || "").replace(/\[email\]/g, c.email || "").trim());
+  const t = g("title"), d = g("desc"), im = g("image");
+  if (t != null && String(t).trim()) {
+    const v = fill(t);
+    html = html.replace(/<title>[^<]*<\/title>/, () => `<title>${v}</title>`)
+               .replace(/(<meta (?:property|name)="(?:og|twitter):title" content=")[^"]*/g, (m, a) => a + v);
+  }
+  if (d != null && String(d).trim()) {
+    const v = fill(d);
+    html = html.replace(/(<meta (?:property|name)="(?:description|og:description|twitter:description)" content=")[^"]*/g, (m, a) => a + v);
+  }
+  if (im != null && String(im).trim()) {
+    const v = esc(/^https?:/.test(im) ? im : origin + (im.startsWith("/") ? "" : "/") + im);
+    html = html.replace(/(<meta (?:property|name)="(?:og:image|twitter:image)" content=")[^"]*/g, (m, a) => a + v);
+  }
+  return html;
+}
+
+function renderHTML(html, c, texts, page, origin) {
+  html = applySeo(html, texts || {}, page, c, origin || "https://dateen.my");
   html = applyTexts(html, texts || {});
   const map = tokenMap(c);
   for (const k in map) html = html.split(k).join(map[k] == null ? "" : String(map[k]));
@@ -250,7 +279,7 @@ export default {
     const ct = res.headers.get("content-type") || "";
     if (ct.includes("text/html")) {
       const [c, t] = await Promise.all([getContent(env), getTexts(env)]);
-      const html = renderHTML(await res.text(), c, t);
+      const html = renderHTML(await res.text(), c, t, pageIdFor(p), url.origin);
       return new Response(html, { status: res.status, headers: { "content-type": "text/html;charset=utf-8", "Cache-Control": "public, max-age=60" } });
     }
     return res;
