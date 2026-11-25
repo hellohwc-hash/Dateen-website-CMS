@@ -75,6 +75,19 @@ async function getContent(env) {
   return DEFAULT_CONTENT;
 }
 
+async function getAccess(env) {
+  try {
+    const a = await env.CONTENT.get("access", "json");
+    if (a && Array.isArray(a.allowedEmails)) return a;
+  } catch (e) {}
+  return { allowedEmails: [] };
+}
+async function allowedEmailSet(env) {
+  const bootstrap = String(env.CMS_ALLOWED_EMAILS || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  const kv = (await getAccess(env)).allowedEmails.map((s) => String(s).trim().toLowerCase()).filter(Boolean);
+  return new Set([...bootstrap, ...kv]);
+}
+
 function renderHTML(html, c) {
   const map = tokenMap(c);
   for (const k in map) html = html.split(k).join(map[k] == null ? "" : String(map[k]));
@@ -121,8 +134,8 @@ async function handleCallback(request, url, env) {
   try { info = await (await fetch(LARK_USERINFO, { headers: { Authorization: "Bearer " + tok.access_token } })).json(); } catch (e) { info = {}; }
   const email = String((info.data && (info.data.email || info.data.enterprise_email)) || "").trim().toLowerCase();
   if (!email) return new Response(page(`<h1>Dateen CMS</h1><p class="err">No email on your Lark account.</p>`), { headers: htmlHeaders });
-  const allowed = String(env.CMS_ALLOWED_EMAILS || "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
-  if (!allowed.length || !allowed.includes(email))
+  const allowed = await allowedEmailSet(env);
+  if (!allowed.size || !allowed.has(email))
     return new Response(page(`<h1>Dateen CMS</h1><p class="err">Access denied for ${esc(email)}.<br>You are not on the allow-list.</p>`), { headers: htmlHeaders });
   const session = await makeSession(env, email);
   return new Response(null, { status: 302, headers: { Location: "/admin", "Set-Cookie": `${SESSION_COOKIE}=${session}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL}` } });
@@ -142,6 +155,16 @@ async function handleApi(request, url, env, email) {
     try { body = await request.json(); } catch { return json({ ok: false, error: "bad json" }, 400); }
     if (!body || typeof body !== "object") return json({ ok: false, error: "bad content" }, 400);
     await env.CONTENT.put("content", JSON.stringify(body));
+    return json({ ok: true });
+  }
+  if (path === "/api/access" && request.method === "GET") {
+    return json({ ok: true, access: await getAccess(env), bootstrap: String(env.CMS_ALLOWED_EMAILS || "").split(",").map((s) => s.trim()).filter(Boolean) });
+  }
+  if (path === "/api/access" && request.method === "PUT") {
+    let body;
+    try { body = await request.json(); } catch { return json({ ok: false, error: "bad json" }, 400); }
+    const list = (Array.isArray(body.allowedEmails) ? body.allowedEmails : []).map((s) => String(s).trim()).filter(Boolean);
+    await env.CONTENT.put("access", JSON.stringify({ allowedEmails: list }));
     return json({ ok: true });
   }
   if (path === "/api/media" && request.method === "POST") {

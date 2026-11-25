@@ -41,7 +41,7 @@ export const ADMIN_HTML = `<!doctype html>
 <div class="wrap" id="app">Loading…</div>
 <div id="msg"></div>
 <script>
-var C=null;
+var C=null,A=[],BOOT=[];
 function msg(t){var m=document.getElementById("msg");m.textContent=t;m.classList.add("show");clearTimeout(m._t);m._t=setTimeout(function(){m.classList.remove("show")},2600)}
 function h(tag,props,kids){var e=document.createElement(tag);if(props)for(var k in props){if(k==="class")e.className=props[k];else if(k==="html")e.innerHTML=props[k];else e.setAttribute(k,props[k])}(kids||[]).forEach(function(c){e.appendChild(typeof c==="string"?document.createTextNode(c):c)});return e}
 function card(title,kids){return h("div",{class:"card"},[h("h2",null,[title])].concat(kids))}
@@ -108,19 +108,29 @@ function render(){
   app.appendChild(card("Clients — Full wall",[listEditor(C.clientsWall)]));
   // gallery
   app.appendChild(card("Catering Gallery",[galleryEditor()]));
+  // team access
+  var bootNote=BOOT.length?h("div",{class:"note"},["Owner (always allowed, set in Cloudflare): "+BOOT.join(", ")]):h("div");
+  app.appendChild(card("Team Access — who can log in (Lark email)",[listEditor(A),bootNote]));
 }
 
 function save(){
   document.getElementById("saveBtn").disabled=true;
-  fetch("/api/content",{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify(C)})
-  .then(function(r){return r.json()}).then(function(d){document.getElementById("saveBtn").disabled=false;msg(d.ok?"Saved ✓  Live on the site in under a minute.":"Error: "+(d.error||"save failed"))})
+  Promise.all([
+    fetch("/api/content",{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify(C)}).then(function(r){return r.json()}),
+    fetch("/api/access",{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({allowedEmails:A})}).then(function(r){return r.json()})
+  ]).then(function(res){document.getElementById("saveBtn").disabled=false;msg((res[0].ok&&res[1].ok)?"Saved ✓  Live on the site in under a minute.":"Error saving")})
   .catch(function(){document.getElementById("saveBtn").disabled=false;msg("Save failed")})
 }
 document.getElementById("saveBtn").onclick=save;
 
-fetch("/api/content").then(function(r){return r.json()}).then(function(d){
+Promise.all([
+  fetch("/api/content").then(function(r){return r.json()}),
+  fetch("/api/access").then(function(r){return r.json()})
+]).then(function(res){
+  var d=res[0],a=res[1];
   if(!d.ok){document.getElementById("app").textContent="Not authorised.";return}
-  C=d.content;document.getElementById("who").textContent=d.email;render();
+  C=d.content;A=(a.access&&a.access.allowedEmails)||[];BOOT=a.bootstrap||[];
+  document.getElementById("who").textContent=d.email;render();
 }).catch(function(){document.getElementById("app").textContent="Failed to load."});
 </script>
 </body></html>`;
