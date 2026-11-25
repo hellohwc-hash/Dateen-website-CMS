@@ -1,9 +1,9 @@
 {
-  "phone": "012-201 5578",
-  "phoneIntl": "+60 12-201 5578",
-  "whatsapp": "60122015578",
-  "email": "dateen.catering@palaterium.com",
-  "address": "18, Jalan Perdana 6/8b, Pandan Perdana, 55300 Cheras, KL",
+  "phone": "@@phone@@",
+  "phoneIntl": "@@phoneIntl@@",
+  "whatsapp": "@@whatsapp@@",
+  "email": "@@email@@",
+  "address": "18, Jalan Perdana 6/8b, Pandan Perdana, 55300 Kuala Lumpur",
   "hoursWeekday": "Mon – Fri · 8:00am – 6:00pm",
   "hoursSat": "Sat · 9:00am – 2:00pm",
   "instagram": "dateencatering",
@@ -15,10 +15,10 @@
     "pax": "35–2500+"
   },
   "banners": {
-    "catering": "/photos/catering-banner.jpg",
-    "bento": "/photos/bento-banner.jpg",
-    "bungkus": "/photos/bungkus-banner.jpg",
-    "vegetarian": "/photos/veg-fried-rice.jpg",
-    "coldbrew": "/photos/cold-brew.png"
+    "catering": "@@banner_catering@@",
+    "bento": "@@banner_bento@@",
+    "bungkus": "@@banner_bungkus@@",
+    "vegetarian": "@@banner_vegetarian@@",
+    "coldbrew": "@@banner_coldbrew@@"
   }
 }

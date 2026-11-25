@@ -239,8 +239,7 @@ permalink: /index.html
   <div class="wrap">
     <div class="trust-label"><span class="label">Trusted by</span></div>
     <div class="trust-logos">
-      {% for c in clients.trusted %}<span>{{ c }}</span>
-      {% endfor %}</div>
+      @@clients_trusted@@</div>
   </div>
 </div>
 
@@ -545,8 +544,7 @@ permalink: /index.html
   <div class="wrap">
     <div class="sec-body" style="padding-top:72px;">
       <div class="wall-grid rv">
-        {% for c in clients.wall %}<div class="wall-cell">{{ c }}</div>
-        {% endfor %}</div>
+        @@clients_wall@@</div>
     </div>
   </div>
 </section>

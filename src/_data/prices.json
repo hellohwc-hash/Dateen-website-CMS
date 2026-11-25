@@ -1,15 +1,15 @@
 {
-  "bentoFrom": "17.90",
-  "valueMeal": "10.50",
-  "vegBento": "17.90",
-  "coldbrewAmericano": "11.00",
-  "coldbrewLatte": "13.00",
-  "bungkusReseller": "3.90",
-  "cateringFullDayA": "63",
-  "cateringFullDayB": "75",
-  "cateringFullDayC": "86",
-  "cateringLunchLocal": "30",
-  "cateringLunchWestern": "40",
-  "cateringTeaLocal": "28",
-  "cateringTeaWestern": "31"
+  "bentoFrom": "@@price_bentoFrom@@",
+  "valueMeal": "@@price_valueMeal@@",
+  "vegBento": "@@price_vegBento@@",
+  "coldbrewAmericano": "@@price_coldbrewAmericano@@",
+  "coldbrewLatte": "@@price_coldbrewLatte@@",
+  "bungkusReseller": "@@price_bungkusReseller@@",
+  "cateringFullDayA": "@@price_cateringFullDayA@@",
+  "cateringFullDayB": "@@price_cateringFullDayB@@",
+  "cateringFullDayC": "@@price_cateringFullDayC@@",
+  "cateringLunchLocal": "@@price_cateringLunchLocal@@",
+  "cateringLunchWestern": "@@price_cateringLunchWestern@@",
+  "cateringTeaLocal": "@@price_cateringTeaLocal@@",
+  "cateringTeaWestern": "@@price_cateringTeaWestern@@"
 }
