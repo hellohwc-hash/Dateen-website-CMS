@@ -2,9 +2,9 @@
   "name": "dateen-website",
   "version": "1.0.0",
   "private": true,
-  "description": "Dateen corporate catering website (Eleventy + Sveltia CMS)",
+  "description": "Dateen corporate catering website (Eleventy + Cloudflare Worker CMS)",
   "scripts": {
-    "build": "eleventy",
+    "build": "node scripts/build-texts.js && eleventy",
     "dev": "eleventy --serve"
   },
   "devDependencies": {

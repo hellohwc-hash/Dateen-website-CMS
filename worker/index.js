@@ -16,6 +16,7 @@
 
 import { DEFAULT_CONTENT, tokenMap } from "./default-content.js";
 import { ADMIN_HTML } from "./admin-html.js";
+import { TEXTS, TEXT_PAGES } from "./texts-manifest.js";
 
 const LARK_AUTHORIZE = "https://accounts.larksuite.com/open-apis/authen/v1/authorize";
 const LARK_TOKEN = "https://open.larksuite.com/open-apis/authen/v2/oauth/token";
@@ -88,7 +89,32 @@ async function allowedEmailSet(env) {
   return new Set([...bootstrap, ...kv]);
 }
 
-function renderHTML(html, c) {
+async function getTexts(env) {
+  try {
+    const t = await env.CONTENT.get("texts", "json");
+    if (t && typeof t === "object") return t;
+  } catch (e) {}
+  return {};
+}
+
+// Editor text format -> HTML.  *accent*  **bold**  _italic_  newline = line break
+function textToHtml(t, orig) {
+  const emOpen = (orig.match(/<span class="em"[^>]*>/) || ['<span class="em">'])[0];
+  const B = /<strong>/.test(orig) ? "strong" : "b";
+  const I = /<em>/.test(orig) ? "em" : "i";
+  return esc(String(t).trim())
+    .replace(/\*\*([^*\n]+?)\*\*/g, `<${B}>$1</${B}>`)
+    .replace(/\*([^*\n]+?)\*/g, `${emOpen}$1</span>`)
+    .replace(/(^|[\s(])_([^_\n]+?)_(?=$|[\s).,!?;:])/g, `$1<${I}>$2</${I}>`)
+    .replace(/\r?\n/g, "<br>");
+}
+const MARK = /<!--E:([\w.-]+)(?:\|[^>]*?)?-->([\s\S]*?)<!--\/E-->/g;
+function applyTexts(html, texts) {
+  return html.replace(MARK, (m, k, orig) => (Object.prototype.hasOwnProperty.call(texts, k) ? textToHtml(texts[k], orig) : orig));
+}
+
+function renderHTML(html, c, texts) {
+  html = applyTexts(html, texts || {});
   const map = tokenMap(c);
   for (const k in map) html = html.split(k).join(map[k] == null ? "" : String(map[k]));
   const trusted = (c.clientsTrusted || []).map((x) => `<span>${esc(x)}</span>`).join("\n      ");
@@ -167,6 +193,18 @@ async function handleApi(request, url, env, email) {
     await env.CONTENT.put("access", JSON.stringify({ allowedEmails: list }));
     return json({ ok: true });
   }
+  if (path === "/api/texts" && request.method === "GET") {
+    return json({ ok: true, pages: TEXT_PAGES, texts: TEXTS, overrides: await getTexts(env) });
+  }
+  if (path === "/api/texts" && request.method === "PUT") {
+    let body;
+    try { body = await request.json(); } catch { return json({ ok: false, error: "bad json" }, 400); }
+    const valid = new Set(TEXTS.map((t) => t.k));
+    const clean = {};
+    for (const k in body || {}) if (valid.has(k) && typeof body[k] === "string") clean[k] = body[k].slice(0, 5000);
+    await env.CONTENT.put("texts", JSON.stringify(clean));
+    return json({ ok: true, count: Object.keys(clean).length });
+  }
   if (path === "/api/media" && request.method === "POST") {
     const ct = request.headers.get("content-type") || "application/octet-stream";
     const name = (url.searchParams.get("name") || "upload").toLowerCase().replace(/[^a-z0-9._-]/g, "-").slice(-60);
@@ -211,7 +249,8 @@ export default {
     const res = await env.ASSETS.fetch(request);
     const ct = res.headers.get("content-type") || "";
     if (ct.includes("text/html")) {
-      const html = renderHTML(await res.text(), await getContent(env));
+      const [c, t] = await Promise.all([getContent(env), getTexts(env)]);
+      const html = renderHTML(await res.text(), c, t);
       return new Response(html, { status: res.status, headers: { "content-type": "text/html;charset=utf-8", "Cache-Control": "public, max-age=60" } });
     }
     return res;

@@ -66,7 +66,7 @@ summary::-webkit-details-marker { display: none; }
   font-size: clamp(28px, 3.2vw, 48px);
   line-height: 1.05; letter-spacing: -0.02em;
 }
-.em { font-family: var(--serif-i); font-style: italic; font-weight: 400; }
+.em { font-family: inherit; font-style: normal; font-weight: inherit; } /* one font for all titles; accent = colour only */
 .label {
   font-size: 11px; font-weight: 600;
   letter-spacing: 0.22em; text-transform: uppercase;
@@ -1159,14 +1159,6 @@ summary::-webkit-details-marker { display: none; }
 .hero-vbg .hero-grid { padding-top: 60px; padding-bottom: 64px; }
 @media (max-width: 640px) {
   .hero-vbg .hero-grid { padding-top: 40px; padding-bottom: 48px; }
-}
-
-/* ---- hero heading: use one font (display) — drop the serif-italic accent in hero titles ---- */
-.hero h1 .em,
-.page-hero h1 .em {
-  font-family: var(--display);
-  font-style: normal;
-  font-weight: 700;
 }
 
 /* ---- floating WhatsApp button ---- */
