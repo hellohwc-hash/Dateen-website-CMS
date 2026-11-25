@@ -51,13 +51,22 @@ function uploadImage(file,cb){
   fetch("/api/media?name="+encodeURIComponent(file.name),{method:"POST",headers:{"content-type":file.type||"application/octet-stream"},body:file})
   .then(function(r){return r.json()}).then(function(d){if(d.ok){cb(d.url)}else{msg(d.error||"Upload failed")}}).catch(function(){msg("Upload failed")})
 }
-function pickImage(cb){var i=h("input",{type:"file",accept:"image/*"});i.style.display="none";document.body.appendChild(i);i.onchange=function(){if(i.files[0]){msg("Uploading…");uploadImage(i.files[0],cb)}document.body.removeChild(i)};i.click()}
+function pickFile(accept,cb){var i=h("input",{type:"file",accept:accept});i.style.display="none";document.body.appendChild(i);i.onchange=function(){if(i.files[0]){msg("Uploading…");uploadImage(i.files[0],cb)}document.body.removeChild(i)};i.click()}
 
-function imgField(label,getv,setv){
+function imgField(label,hint,getv,setv){
   var img=h("img",{src:getv()||""});
   var btn=h("button",{class:"ghost"},["Upload new"]);
-  btn.onclick=function(){pickImage(function(url){setv(url);img.src=url;msg("Image uploaded — remember to Save")})};
-  return h("div",{class:"imgrow"},[img,h("div",{class:"nm"},[label]),btn]);
+  btn.onclick=function(){pickFile("image/*",function(url){setv(url);img.src=url;msg("Image uploaded — remember to Save")})};
+  var nm=h("div",{class:"nm"},[label]);nm.appendChild(h("div",{class:"note",style:"margin-top:2px"},["Recommended: "+(hint||"")]));
+  return h("div",{class:"imgrow"},[img,nm,btn]);
+}
+
+function pdfField(label,getv,setv){
+  var cur=h("a",{href:getv()||"#",target:"_blank",style:"color:#e40420;text-decoration:none;font-size:13px"},["View current PDF ↗"]);
+  var btn=h("button",{class:"ghost"},["Upload new PDF"]);
+  btn.onclick=function(){pickFile("application/pdf",function(url){setv(url);cur.setAttribute("href",url);msg("Menu uploaded — remember to Save")})};
+  var nm=h("div",{class:"nm"},[label]);nm.appendChild(h("div",{style:"margin-top:3px"},[cur]));
+  return h("div",{class:"imgrow"},[nm,btn]);
 }
 
 function listEditor(arr){
@@ -86,7 +95,7 @@ function galleryEditor(){
 }
 
 var PRICE=[["bentoFrom","Bento from (RM)"],["valueMeal","Value meal (RM)"],["vegBento","Vegetarian bento (RM)"],["coldbrewAmericano","Cold Brew Americano (RM)"],["coldbrewLatte","Cold Brew Latte (RM)"],["bungkusReseller","Bungkus reseller each (RM)"],["cateringFullDayA","Catering Full Day A (RM/pax)"],["cateringFullDayB","Catering Full Day B (RM/pax)"],["cateringFullDayC","Catering Full Day C Western (RM/pax)"],["cateringLunchLocal","Lunch&Dinner Local from (RM/pax)"],["cateringLunchWestern","Lunch&Dinner Western from (RM/pax)"],["cateringTeaLocal","Tea Break Local from (RM/pax)"],["cateringTeaWestern","Tea Break Western from (RM/pax)"]];
-var BAN=[["catering","Catering Service banner"],["bento","Bento Menu banner"],["bungkus","Bungkus Supply banner"],["vegetarian","Vegetarian Catering banner"],["coldbrew","Cold Brew visual"]];
+var BAN=[["catering","Catering Service banner","wide landscape ~1600×900 px (16:9)"],["bento","Bento Menu banner","wide banner ~1600×760 px (2:1)"],["bungkus","Bungkus Supply banner","wide banner ~1600×760 px (2:1)"],["vegetarian","Vegetarian Catering banner","~1000×760 px (4:3)"],["coldbrew","Cold Brew visual","square ~800×800 px (1:1)"]];
 
 function render(){
   var app=document.getElementById("app");app.innerHTML="";
@@ -97,8 +106,10 @@ function render(){
   });
   app.appendChild(card("Contact",[cg]));
   // banners
-  var bk=BAN.map(function(f){return imgField(f[1],function(){return C.banners[f[0]]},function(v){C.banners[f[0]]=v})});
+  var bk=BAN.map(function(f){return imgField(f[1],f[2],function(){return C.banners[f[0]]},function(v){C.banners[f[0]]=v})});
   app.appendChild(card("Page Banners",bk.concat([h("div",{class:"note"},["Tip: upload images already sized for web (under ~1MB) for a fast site."])])));
+  // downloads
+  app.appendChild(card("Downloads",[pdfField("Menu PDF (the “Download Menu” button on the site)",function(){return C.menuPdf},function(v){C.menuPdf=v})]));
   // prices
   var pg=h("div",{class:"grid"});
   PRICE.forEach(function(f){pg.appendChild(textField(f[1],function(){return C.prices[f[0]]},function(v){C.prices[f[0]]=v}))});

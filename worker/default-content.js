@@ -6,6 +6,7 @@ export const DEFAULT_CONTENT = {
   whatsapp: "60122015578",
   email: "dateen.catering@palaterium.com",
   address: "18, Jalan Perdana 6/8b, Pandan Perdana, 55300 Kuala Lumpur",
+  menuPdf: "/Dateen-Corporate-Menu-2026.pdf",
 
   banners: {
     catering: "/photos/catering-banner.jpg",
@@ -63,6 +64,7 @@ export function tokenMap(c) {
     "@@whatsapp@@": c.whatsapp,
     "@@email@@": c.email,
     "@@address@@": c.address,
+    "@@menu_pdf@@": c.menuPdf,
     "@@banner_catering@@": c.banners.catering,
     "@@banner_bento@@": c.banners.bento,
     "@@banner_bungkus@@": c.banners.bungkus,
