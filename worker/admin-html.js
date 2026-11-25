@@ -12,6 +12,8 @@ export const ADMIN_HTML = `<!doctype html>
   header b.logo{color:var(--red);font-size:18px;letter-spacing:-.02em}
   header .sp{flex:1}
   #who{font-size:12px;color:#999}
+  .vsite{color:#333;text-decoration:none;font-weight:600;font-size:13px;padding:8px 14px;border:1px solid #d6d4d0;border-radius:7px;white-space:nowrap}
+  .vsite:hover{border-color:var(--red);color:var(--red)}
   #dirty{font-size:12px;color:#b86e00;display:none}
   #search{width:240px;padding:8px 10px;border:1px solid #d6d4d0;border-radius:7px;font:inherit;background:#fafafa}
   button{font:inherit;cursor:pointer;border:0;border-radius:7px;padding:9px 16px;font-weight:600}
@@ -74,6 +76,7 @@ export const ADMIN_HTML = `<!doctype html>
 </style></head>
 <body>
 <header><b class="logo">Dateen CMS</b><span id="who"></span><span class="sp"></span>
+  <a class="vsite" href="/" target="_blank" rel="noopener">View site ↗</a>
   <span id="dirty">● Unsaved changes</span>
   <input id="search" type="search" placeholder="Search any text on the site…">
   <button class="save" id="saveBtn">Save all changes</button></header>
